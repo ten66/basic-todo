@@ -132,6 +132,31 @@ export default function TodoScreen() {
     ]);
   };
 
+  const deleteCompletedTodos = () => {
+    const completedCount = todos.filter((todo) => todo.completed).length;
+    if (completedCount === 0) {
+      Alert.alert("お知らせ", "完了済みのタスクがありません");
+      return;
+    }
+
+    Alert.alert("完了済みタスクを削除", `${completedCount}個の完了済みタスクを削除しますか？`, [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "削除",
+        style: "destructive",
+        onPress: () => {
+          const newTodos = todos.filter((todo) => !todo.completed);
+          const reorderedTodos = newTodos.map((todo, index) => ({
+            ...todo,
+            order: index,
+          }));
+          setTodos(reorderedTodos);
+          saveTodos(reorderedTodos);
+        },
+      },
+    ]);
+  };
+
   const toggleTodo = (id: string) => {
     const newTodos = todos.map((todo) =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo,
@@ -261,9 +286,21 @@ export default function TodoScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>マイタスク</Text>
-          <Text style={styles.subtitle}>{todos.filter((t) => !t.completed).length} 件のタスク</Text>
-          {todos.length > 1 && <Text style={styles.dragHint}>≡ を長押しして並び替え</Text>}
+          <View style={styles.headerContent}>
+            <View style={styles.headerText}>
+              <Text style={styles.title}>マイタスク</Text>
+              <Text style={styles.subtitle}>
+                {todos.filter((t) => !t.completed).length} 件のタスク
+              </Text>
+              {todos.length > 1 && <Text style={styles.dragHint}>≡ を長押しして並び替え</Text>}
+            </View>
+            {todos.some((todo) => todo.completed) && (
+              <TouchableOpacity style={styles.deleteCompletedButton} onPress={deleteCompletedTodos}>
+                <Ionicons name="trash-outline" size={20} color="#F44336" />
+                <Text style={styles.deleteCompletedText}>完了済み削除</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* Todo List */}
@@ -375,6 +412,14 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 16,
   },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerText: {
+    flex: 1,
+  },
   title: {
     fontSize: 32,
     fontWeight: "bold",
@@ -390,6 +435,22 @@ const styles = StyleSheet.create({
     color: "#999",
     marginTop: 4,
     fontStyle: "italic",
+  },
+  deleteCompletedButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF5F5",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#FFEBEE",
+  },
+  deleteCompletedText: {
+    fontSize: 12,
+    color: "#F44336",
+    marginLeft: 4,
+    fontWeight: "500",
   },
   list: {
     flex: 1,
