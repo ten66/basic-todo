@@ -22,7 +22,13 @@ import DraggableFlatList, {
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  SlideInDown,
+  SlideOutDown,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
@@ -198,6 +204,7 @@ export default function TodoScreen() {
           <Animated.View
             entering={FadeIn}
             exiting={FadeOut}
+            layout={LinearTransition.duration(200)}
             style={[styles.todoItem, isActive && styles.todoItemDragging]}>
             <TouchableOpacity onLongPress={drag} disabled={isActive} style={styles.dragHandle}>
               <Ionicons name="reorder-three" size={24} color="#CCC" />
@@ -332,6 +339,7 @@ export default function TodoScreen() {
                   <Animated.View
                     entering={SlideInDown}
                     exiting={SlideOutDown}
+                    layout={LinearTransition.duration(250)}
                     style={[
                       styles.modalContent,
                       {
