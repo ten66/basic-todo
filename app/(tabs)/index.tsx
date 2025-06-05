@@ -17,18 +17,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-// DraggableFlatList と関連コンポーネントをインポート
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
-import { GestureHandlerRootView } from "react-native-gesture-handler"; // 追加
-import Animated, {
-  FadeIn, // FadeIn, FadeOut はアイテム追加・削除時のアニメーションに使える
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
-} from "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
@@ -42,7 +36,6 @@ interface Todo {
 }
 
 const STORAGE_KEY = "todos";
-// const ITEM_HEIGHT = 80; // DraggableFlatListでは必須ではない
 
 export default function TodoScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -51,10 +44,8 @@ export default function TodoScreen() {
   const [editingText, setEditingText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  // const [isDragging, setIsDragging] = useState(false); // DraggableFlatListが内部管理
   const insets = useSafeAreaInsets();
 
-  // Load todos from storage
   useEffect(() => {
     loadTodos();
   }, []);
@@ -78,7 +69,6 @@ export default function TodoScreen() {
 
   const saveTodos = async (newTodos: Todo[]) => {
     try {
-      // 保存前に order でソートすることを保証
       const sortedTodos = [...newTodos].sort((a, b) => a.order - b.order);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sortedTodos));
     } catch (error) {
@@ -98,7 +88,7 @@ export default function TodoScreen() {
       text: inputText.trim(),
       completed: false,
       createdAt: Date.now(),
-      order: 0, // 新しいタスクを最上位に
+      order: 0,
     };
 
     const updatedTodos = todos.map((todo) => ({
@@ -162,7 +152,7 @@ export default function TodoScreen() {
       todo.id === id ? { ...todo, completed: !todo.completed } : todo,
     );
     setTodos(newTodos);
-    saveTodos(newTodos); // orderは変わらないのでそのまま保存
+    saveTodos(newTodos);
   };
 
   const startEdit = (id: string, text: string) => {
@@ -183,14 +173,13 @@ export default function TodoScreen() {
       todo.id === editingId ? { ...todo, text: editingText.trim() } : todo,
     );
     setTodos(newTodos);
-    saveTodos(newTodos); // orderは変わらないのでそのまま保存
+    saveTodos(newTodos);
     setEditingId(null);
     setEditingText("");
     setIsEditMode(false);
     setIsModalVisible(false);
   };
 
-  // DraggableFlatList の renderItem
   const renderTodoItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<Todo>) => {
       const truncateText = (text: string) => {
@@ -205,19 +194,12 @@ export default function TodoScreen() {
       };
 
       return (
-        // ScaleDecorator はドラッグ中にアイテムを少し拡大するなどの効果を提供
         <ScaleDecorator>
           <Animated.View
-            entering={FadeIn} // アイテム追加時のアニメーション
-            exiting={FadeOut} // アイtem削除時のアニメーション
-            style={[
-              styles.todoItem,
-              isActive && styles.todoItemDragging, // ドラッグ中のスタイル
-            ]}>
-            <TouchableOpacity
-              onLongPress={drag} // この要素を長押しでドラッグ開始
-              disabled={isActive} // ドラッグ中は他の操作を無効化
-              style={styles.dragHandle}>
+            entering={FadeIn}
+            exiting={FadeOut}
+            style={[styles.todoItem, isActive && styles.todoItemDragging]}>
+            <TouchableOpacity onLongPress={drag} disabled={isActive} style={styles.dragHandle}>
               <Ionicons name="reorder-three" size={24} color="#CCC" />
             </TouchableOpacity>
 
@@ -251,12 +233,10 @@ export default function TodoScreen() {
         </ScaleDecorator>
       );
     },
-    [toggleTodo, startEdit, deleteTodo], // 依存配列
+    [toggleTodo, startEdit, deleteTodo],
   );
 
   const onDragEnd = ({ data: newSortedData }: { data: Todo[] }) => {
-    // DraggableFlatListから渡されるデータは既に並び替えられている
-    // その順序に基づいてorderプロパティを更新する
     const reorderedTodos = newSortedData.map((todo, index) => ({
       ...todo,
       order: index,
@@ -317,9 +297,8 @@ export default function TodoScreen() {
               renderItem={renderTodoItem}
               keyExtractor={(item) => item.id}
               onDragEnd={onDragEnd}
-              containerStyle={{ flex: 1 }} // DraggableFlatListがリスト領域を埋めるように
+              containerStyle={{ flex: 1 }}
               contentContainerStyle={[styles.listContent, { paddingBottom: 120 + insets.bottom }]}
-              // scrollEnabled は DraggableFlatList が内部で管理
             />
           )}
         </View>
@@ -329,7 +308,7 @@ export default function TodoScreen() {
           style={[
             styles.fab,
             {
-              bottom: 100 + insets.bottom, // 元のコードでは70でしたが、UIに合わせて調整してください
+              bottom: 100 + insets.bottom,
             },
           ]}
           onPress={openAddModal}>
@@ -455,44 +434,37 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
-  // scrollView: { // DraggableFlatListがこれを担当
-  //   flex: 1,
-  // },
   listContent: {
-    paddingHorizontal: 16, // 左右のパディング
-    paddingTop: 16, // 上のパディング
-    // paddingBottom は DraggableFlatList の contentContainerStyle で動的に設定
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   todoItem: {
     backgroundColor: "white",
     borderRadius: 12,
-    paddingVertical: 12, //少し調整
+    paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 70, // 元のITEM_HEIGHTに近い値に設定 (調整可能)
+    minHeight: 70,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 1, // 少し控えめに
+      height: 1,
     },
-    shadowOpacity: 0.08, // 少し控えめに
-    shadowRadius: 4, // 少し控えめに
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
   },
   todoItemDragging: {
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 10,
-    // backgroundColor: '#FAFAFA', // ドラッグ中に背景色を変える例
   },
   dragHandle: {
-    paddingRight: 12, // アイコンとテキスト間のスペース
-    paddingLeft: 0, // 左端に寄せる
-    paddingVertical: 8, // タッチエリアを確保
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    paddingRight: 12,
+    paddingLeft: 0,
+    paddingVertical: 8,
   },
   checkbox: {
     marginRight: 12,
@@ -543,9 +515,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingHorizontal: 24, // 左右のパディング
-    paddingTop: 24, // 上のパディング
-    // paddingBottom は動的に設定
+    paddingHorizontal: 24,
+    paddingTop: 24,
     maxHeight: height * 0.7,
   },
   modalHeader: {
