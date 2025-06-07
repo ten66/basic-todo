@@ -11,7 +11,15 @@ import {
   View,
 } from "react-native";
 
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { useThemeContext } from "@/hooks/useThemeContext";
+
 export default function SettingsScreen() {
+  const { themeMode, setThemeMode, effectiveTheme } = useThemeContext();
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const tintColor = useThemeColor({}, "tint");
+
   const clearAllTodos = async () => {
     Alert.alert(
       "すべてのタスクを削除",
@@ -34,19 +42,88 @@ export default function SettingsScreen() {
     );
   };
 
+  const getThemeModeLabel = (mode: "light" | "dark" | "system") => {
+    switch (mode) {
+      case "light":
+        return "ライト";
+      case "dark":
+        return "ダーク";
+      case "system":
+        return "システム設定に従う";
+    }
+  };
+
+  const ThemeOption = ({
+    mode,
+    icon,
+    isLast,
+  }: {
+    mode: "light" | "dark" | "system";
+    icon: string;
+    isLast?: boolean;
+  }) => (
+    <TouchableOpacity
+      style={[
+        {
+          padding: 16,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottomWidth: isLast ? 0 : StyleSheet.hairlineWidth,
+          borderBottomColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+        },
+        { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+      ]}
+      onPress={() => setThemeMode(mode)}>
+      <View style={styles.optionLeft}>
+        <Ionicons name={icon as any} size={24} color={themeMode === mode ? tintColor : textColor} />
+        <Text
+          style={[
+            styles.themeOptionText,
+            {
+              color: themeMode === mode ? tintColor : textColor,
+              fontWeight: themeMode === mode ? "600" : "normal",
+            },
+          ]}>
+          {getThemeModeLabel(mode)}
+        </Text>
+      </View>
+      {themeMode === mode && <Ionicons name="checkmark" size={20} color={tintColor} />}
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <StatusBar barStyle={effectiveTheme === "dark" ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.title}>設定</Text>
+        <Text style={[styles.title, { color: textColor }]}>設定</Text>
       </View>
 
       <View style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>データ管理</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>外観</Text>
 
-          <TouchableOpacity style={styles.option} onPress={clearAllTodos}>
+          <View
+            style={[
+              styles.themeSection,
+              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+            ]}>
+            <ThemeOption mode="system" icon="phone-portrait-outline" />
+            <ThemeOption mode="light" icon="sunny-outline" />
+            <ThemeOption mode="dark" icon="moon-outline" isLast />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>データ管理</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.option,
+              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+            ]}
+            onPress={clearAllTodos}>
             <View style={styles.optionLeft}>
               <Ionicons name="trash-outline" size={24} color="#F44336" />
               <Text style={[styles.optionText, { color: "#F44336" }]}>すべてのタスクを削除</Text>
@@ -56,10 +133,14 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>アプリについて</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>アプリについて</Text>
 
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>
+          <View
+            style={[
+              styles.infoContainer,
+              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+            ]}>
+            <Text style={[styles.infoText, { color: textColor }]}>
               シンプルで使いやすいTODOアプリです。{"\n"}
               タスクの追加、編集、削除、完了状態の管理ができます。
             </Text>
@@ -73,7 +154,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
   },
   header: {
     padding: 24,
@@ -82,7 +162,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#1A1A1A",
   },
   content: {
     flex: 1,
@@ -94,12 +173,27 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#666",
     marginBottom: 12,
     marginLeft: 4,
   },
-  option: {
+  themeSection: {
     backgroundColor: "white",
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  themeOptionText: {
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  option: {
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
@@ -121,10 +215,8 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     marginLeft: 12,
-    color: "#1A1A1A",
   },
   infoContainer: {
-    backgroundColor: "white",
     borderRadius: 12,
     padding: 20,
     shadowColor: "#000",
@@ -139,6 +231,5 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 14,
     lineHeight: 20,
-    color: "#666",
   },
 });

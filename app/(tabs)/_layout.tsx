@@ -5,16 +5,19 @@ import { Platform } from "react-native";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemeContext } from "@/hooks/useThemeContext";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { effectiveTheme } = useThemeContext();
+
+  const tabBarActiveTintColor = effectiveTheme === "dark" ? "#4A90E2" : "#0a7ea4";
+  const tabBarInactiveTintColor = effectiveTheme === "dark" ? "#8E8E93" : "#687076";
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: tabBarActiveTintColor,
+        tabBarInactiveTintColor: tabBarInactiveTintColor,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -23,7 +26,10 @@ export default function TabLayout() {
             // Use a transparent background on iOS to show the blur effect
             position: "absolute",
           },
-          default: {},
+          default: {
+            backgroundColor: effectiveTheme === "dark" ? "#1C1C1E" : "#F8F9FA",
+            borderTopColor: effectiveTheme === "dark" ? "#3A3A3C" : "#E0E0E0",
+          },
         }),
       }}>
       <Tabs.Screen
