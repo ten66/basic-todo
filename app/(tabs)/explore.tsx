@@ -126,7 +126,10 @@ export default function SettingsScreen() {
           <View
             style={[
               styles.themeSection,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+              {
+                backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white",
+                borderColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+              },
             ]}>
             <ThemeOption mode="system" icon="phone-portrait-outline" />
             <ThemeOption mode="light" icon="sunny-outline" />
@@ -140,7 +143,10 @@ export default function SettingsScreen() {
           <View
             style={[
               styles.supportSection,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+              {
+                backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white",
+                borderColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+              },
             ]}>
             <TouchableOpacity
               style={[
@@ -224,9 +230,11 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
   },
   themeOptionText: {
     fontSize: 16,
@@ -243,9 +251,11 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
   },
   supportSection: {
     backgroundColor: "white",
@@ -256,9 +266,11 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
   },
   supportOption: {
     padding: 16,
