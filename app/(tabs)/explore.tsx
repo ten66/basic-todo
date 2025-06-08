@@ -135,23 +135,6 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>データ管理</Text>
-
-          <TouchableOpacity
-            style={[
-              styles.option,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
-            ]}
-            onPress={clearAllTodos}>
-            <View style={styles.optionLeft}>
-              <Ionicons name="trash-outline" size={24} color="#F44336" />
-              <Text style={[styles.optionText, { color: "#F44336" }]}>すべてのタスクを削除</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#CCC" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>サポート</Text>
 
           <View
@@ -200,21 +183,6 @@ export default function SettingsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#CCC" />
             </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>アプリについて</Text>
-
-          <View
-            style={[
-              styles.infoContainer,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
-            ]}>
-            <Text style={[styles.infoText, { color: textColor }]}>
-              シンプルで使いやすいTODOアプリです。{"\n"}
-              タスクの追加、編集、削除、完了状態の管理ができます。
-            </Text>
           </View>
         </View>
       </View>
