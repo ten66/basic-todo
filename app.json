@@ -4,7 +4,7 @@
     "slug": "basic-todo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/BasicTODO-icon.png",
     "scheme": "basictodo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
