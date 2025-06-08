@@ -16,9 +16,9 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { useThemeContext } from "@/hooks/useThemeContext";
 
 // 仮のURL定義
-const PRIVACY_POLICY_URL = "https://example.com/privacy-policy";
-const TERMS_OF_SERVICE_URL = "https://example.com/terms-of-service";
-const CONTACT_URL = "https://example.com/contact";
+const PRIVACY_POLICY_URL = "https://sites.google.com/view/basictodo-privacy";
+const TERMS_OF_SERVICE_URL = "https://sites.google.com/view/basictodo-terms";
+const CONTACT_URL = "https://forms.gle/7y6EYMK6XKm2yZfYA";
 
 export default function SettingsScreen() {
   const { themeMode, setThemeMode, effectiveTheme } = useThemeContext();
