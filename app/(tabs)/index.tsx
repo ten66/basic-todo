@@ -31,6 +31,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { useThemeContext } from "@/hooks/useThemeContext";
+
 const { width, height } = Dimensions.get("window");
 
 interface Todo {
@@ -51,6 +54,22 @@ export default function TodoScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const insets = useSafeAreaInsets();
+
+  // Theme colors
+  const { effectiveTheme } = useThemeContext();
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const tintColor = useThemeColor({}, "tint");
+  const iconColor = useThemeColor({}, "icon");
+
+  // Dynamic colors based on theme
+  const cardBackgroundColor = effectiveTheme === "dark" ? "#2A2A2A" : "white";
+  const subtitleColor = effectiveTheme === "dark" ? "#999" : "#666";
+  const borderColor = effectiveTheme === "dark" ? "#444" : "#E0E0E0";
+  const placeholderColor = effectiveTheme === "dark" ? "#666" : "#999";
+  const inputBackgroundColor = effectiveTheme === "dark" ? "#333" : "#F8F9FA";
+  const emptyIconColor = effectiveTheme === "dark" ? "#555" : "#E0E0E0";
+  const dragHandleColor = effectiveTheme === "dark" ? "#666" : "#CCC";
 
   useEffect(() => {
     loadTodos();
@@ -205,22 +224,56 @@ export default function TodoScreen() {
             entering={FadeIn}
             exiting={FadeOut}
             layout={LinearTransition.duration(200)}
-            style={[styles.todoItem, isActive && styles.todoItemDragging]}>
+            style={[
+              {
+                backgroundColor: cardBackgroundColor,
+                borderRadius: 12,
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+                marginBottom: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                minHeight: 70,
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 1,
+                },
+                shadowOpacity: effectiveTheme === "dark" ? 0.3 : 0.08,
+                shadowRadius: 4,
+                elevation: 2,
+              },
+              isActive && {
+                shadowOpacity: effectiveTheme === "dark" ? 0.5 : 0.25,
+                shadowRadius: 12,
+                elevation: 10,
+              },
+            ]}>
             <TouchableOpacity onLongPress={drag} disabled={isActive} style={styles.dragHandle}>
-              <Ionicons name="reorder-three" size={24} color="#CCC" />
+              <Ionicons name="reorder-three" size={24} color={dragHandleColor} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.checkbox} onPress={() => toggleTodo(item.id)}>
               <Ionicons
                 name={item.completed ? "checkmark-circle" : "ellipse-outline"}
                 size={24}
-                color={item.completed ? "#4CAF50" : "#E0E0E0"}
+                color={item.completed ? "#4CAF50" : borderColor}
               />
             </TouchableOpacity>
 
             <View style={styles.todoContent}>
               <Text
-                style={[styles.todoText, item.completed && styles.completedText]}
+                style={[
+                  {
+                    fontSize: 16,
+                    color: textColor,
+                    lineHeight: 22,
+                  },
+                  item.completed && {
+                    textDecorationLine: "line-through",
+                    color: subtitleColor,
+                  },
+                ]}
                 numberOfLines={2}>
                 {truncateText(item.text)}
               </Text>
@@ -240,7 +293,17 @@ export default function TodoScreen() {
         </ScaleDecorator>
       );
     },
-    [toggleTodo, startEdit, deleteTodo],
+    [
+      toggleTodo,
+      startEdit,
+      deleteTodo,
+      cardBackgroundColor,
+      textColor,
+      subtitleColor,
+      borderColor,
+      dragHandleColor,
+      effectiveTheme,
+    ],
   );
 
   const onDragEnd = ({ data: newSortedData }: { data: Todo[] }) => {
@@ -268,21 +331,33 @@ export default function TodoScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <StatusBar barStyle={effectiveTheme === "dark" ? "light-content" : "dark-content"} />
 
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <View style={styles.headerText}>
-              <Text style={styles.title}>マイタスク</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, { color: textColor }]}>マイタスク</Text>
+              <Text style={[styles.subtitle, { color: subtitleColor }]}>
                 {todos.filter((t) => !t.completed).length} 件のタスク
               </Text>
-              {todos.length > 1 && <Text style={styles.dragHint}>≡ を長押しして並び替え</Text>}
+              {todos.length > 1 && (
+                <Text style={[styles.dragHint, { color: placeholderColor }]}>
+                  ≡ を長押しして並び替え
+                </Text>
+              )}
             </View>
             {todos.some((todo) => todo.completed) && (
-              <TouchableOpacity style={styles.deleteCompletedButton} onPress={deleteCompletedTodos}>
+              <TouchableOpacity
+                style={[
+                  styles.deleteCompletedButton,
+                  {
+                    backgroundColor: effectiveTheme === "dark" ? "#4A1D1D" : "#FFF5F5",
+                    borderColor: effectiveTheme === "dark" ? "#722C2C" : "#FFEBEE",
+                  },
+                ]}
+                onPress={deleteCompletedTodos}>
                 <Ionicons name="trash-outline" size={20} color="#F44336" />
                 <Text style={styles.deleteCompletedText}>完了済み削除</Text>
               </TouchableOpacity>
@@ -294,9 +369,11 @@ export default function TodoScreen() {
         <View style={styles.list}>
           {todos.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="checkmark-done-circle-outline" size={64} color="#E0E0E0" />
-              <Text style={styles.emptyText}>タスクがありません</Text>
-              <Text style={styles.emptySubtext}>新しいタスクを追加してみましょう</Text>
+              <Ionicons name="checkmark-done-circle-outline" size={64} color={emptyIconColor} />
+              <Text style={[styles.emptyText, { color: subtitleColor }]}>タスクがありません</Text>
+              <Text style={[styles.emptySubtext, { color: placeholderColor }]}>
+                新しいタスクを追加してみましょう
+              </Text>
             </View>
           ) : (
             <DraggableFlatList
@@ -316,6 +393,8 @@ export default function TodoScreen() {
             styles.fab,
             {
               bottom: 100 + insets.bottom,
+              backgroundColor: effectiveTheme === "dark" ? "#4A90E2" : tintColor,
+              shadowColor: effectiveTheme === "dark" ? "#4A90E2" : tintColor,
             },
           ]}
           onPress={openAddModal}>
@@ -341,23 +420,36 @@ export default function TodoScreen() {
                     exiting={SlideOutDown}
                     layout={LinearTransition.duration(250)}
                     style={[
-                      styles.modalContent,
                       {
+                        backgroundColor: cardBackgroundColor,
+                        borderTopLeftRadius: 24,
+                        borderTopRightRadius: 24,
+                        paddingHorizontal: 24,
+                        paddingTop: 24,
+                        maxHeight: height * 0.7,
                         paddingBottom: Math.max(24, insets.bottom),
                       },
                     ]}>
                     <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>
+                      <Text style={[styles.modalTitle, { color: textColor }]}>
                         {isEditMode ? "タスクを編集" : "新しいタスク"}
                       </Text>
                       <TouchableOpacity onPress={closeModal}>
-                        <Ionicons name="close" size={24} color="#666" />
+                        <Ionicons name="close" size={24} color={iconColor} />
                       </TouchableOpacity>
                     </View>
 
                     <TextInput
-                      style={styles.input}
+                      style={[
+                        styles.input,
+                        {
+                          borderColor: borderColor,
+                          backgroundColor: inputBackgroundColor,
+                          color: textColor,
+                        },
+                      ]}
                       placeholder="タスクを入力してください..."
+                      placeholderTextColor={placeholderColor}
                       value={isEditMode ? editingText : inputText}
                       onChangeText={isEditMode ? setEditingText : setInputText}
                       multiline
@@ -365,15 +457,21 @@ export default function TodoScreen() {
                       autoFocus
                     />
 
-                    <Text style={styles.charCount}>
+                    <Text style={[styles.charCount, { color: placeholderColor }]}>
                       {(isEditMode ? editingText : inputText).length}/100
                     </Text>
 
                     <TouchableOpacity
                       style={[
-                        styles.saveButton,
-                        (isEditMode ? editingText.trim() : inputText.trim()).length === 0 &&
-                          styles.saveButtonDisabled,
+                        {
+                          backgroundColor: effectiveTheme === "dark" ? "#4A90E2" : tintColor,
+                          borderRadius: 12,
+                          padding: 16,
+                          alignItems: "center",
+                        },
+                        (isEditMode ? editingText.trim() : inputText.trim()).length === 0 && {
+                          backgroundColor: effectiveTheme === "dark" ? "#555" : borderColor,
+                        },
                       ]}
                       onPress={isEditMode ? saveEdit : addTodo}
                       disabled={(isEditMode ? editingText.trim() : inputText.trim()).length === 0}>
@@ -393,7 +491,6 @@ export default function TodoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
   },
   header: {
     padding: 24,
@@ -410,28 +507,23 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#1A1A1A",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
   },
   dragHint: {
     fontSize: 12,
-    color: "#999",
     marginTop: 4,
     fontStyle: "italic",
   },
   deleteCompletedButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF5F5",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#FFEBEE",
   },
   deleteCompletedText: {
     fontSize: 12,
@@ -446,29 +538,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  todoItem: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: 70,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  todoItemDragging: {
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 10,
-  },
   dragHandle: {
     paddingRight: 12,
     paddingLeft: 0,
@@ -479,15 +548,6 @@ const styles = StyleSheet.create({
   },
   todoContent: {
     flex: 1,
-  },
-  todoText: {
-    fontSize: 16,
-    color: "#1A1A1A",
-    lineHeight: 22,
-  },
-  completedText: {
-    textDecorationLine: "line-through",
-    color: "#999",
   },
   todoActions: {
     flexDirection: "row",
@@ -503,10 +563,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#2196F3",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#2196F3",
     shadowOffset: {
       width: 0,
       height: 4,
@@ -519,14 +577,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    maxHeight: height * 0.7,
-  },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -536,33 +586,20 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#1A1A1A",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     minHeight: 80,
     textAlignVertical: "top",
-    backgroundColor: "#F8F9FA",
   },
   charCount: {
     textAlign: "right",
-    color: "#999",
     fontSize: 12,
     marginTop: 8,
     marginBottom: 20,
-  },
-  saveButton: {
-    backgroundColor: "#2196F3",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    backgroundColor: "#E0E0E0",
   },
   saveButtonText: {
     color: "white",
@@ -577,12 +614,10 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#999",
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "#CCC",
     marginTop: 4,
   },
 });
