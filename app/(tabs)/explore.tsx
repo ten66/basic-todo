@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import {
   Alert,
+  Linking,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -13,6 +14,11 @@ import {
 
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useThemeContext } from "@/hooks/useThemeContext";
+
+// 仮のURL定義
+const PRIVACY_POLICY_URL = "https://sites.google.com/view/basictodo-privacy";
+const TERMS_OF_SERVICE_URL = "https://sites.google.com/view/basictodo-terms";
+const CONTACT_URL = "https://forms.gle/7y6EYMK6XKm2yZfYA";
 
 export default function SettingsScreen() {
   const { themeMode, setThemeMode, effectiveTheme } = useThemeContext();
@@ -40,6 +46,19 @@ export default function SettingsScreen() {
         },
       ],
     );
+  };
+
+  const openURL = async (url: string, title: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("エラー", `${title}を開くことができませんでした`);
+      }
+    } catch (error) {
+      Alert.alert("エラー", `${title}を開くことができませんでした`);
+    }
   };
 
   const getThemeModeLabel = (mode: "light" | "dark" | "system") => {
@@ -107,7 +126,10 @@ export default function SettingsScreen() {
           <View
             style={[
               styles.themeSection,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+              {
+                backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white",
+                borderColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+              },
             ]}>
             <ThemeOption mode="system" icon="phone-portrait-outline" />
             <ThemeOption mode="light" icon="sunny-outline" />
@@ -116,34 +138,57 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>データ管理</Text>
-
-          <TouchableOpacity
-            style={[
-              styles.option,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
-            ]}
-            onPress={clearAllTodos}>
-            <View style={styles.optionLeft}>
-              <Ionicons name="trash-outline" size={24} color="#F44336" />
-              <Text style={[styles.optionText, { color: "#F44336" }]}>すべてのタスクを削除</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#CCC" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>アプリについて</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>サポート</Text>
 
           <View
             style={[
-              styles.infoContainer,
-              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+              styles.supportSection,
+              {
+                backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white",
+                borderColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+              },
             ]}>
-            <Text style={[styles.infoText, { color: textColor }]}>
-              シンプルで使いやすいTODOアプリです。{"\n"}
-              タスクの追加、編集、削除、完了状態の管理ができます。
-            </Text>
+            <TouchableOpacity
+              style={[
+                styles.supportOption,
+                {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+                },
+              ]}
+              onPress={() => openURL(PRIVACY_POLICY_URL, "プライバシーポリシー")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="shield-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>プライバシーポリシー</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.supportOption,
+                {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+                },
+              ]}
+              onPress={() => openURL(TERMS_OF_SERVICE_URL, "利用規約")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="document-text-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>利用規約</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.supportOption}
+              onPress={() => openURL(CONTACT_URL, "お問い合わせ")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="mail-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>お問い合わせ</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -185,9 +230,11 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
   },
   themeOptionText: {
     fontSize: 16,
@@ -204,9 +251,32 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
+  },
+  supportSection: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E0E0E0",
+  },
+  supportOption: {
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   optionLeft: {
     flexDirection: "row",
