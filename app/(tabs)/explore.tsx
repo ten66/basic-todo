@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import {
   Alert,
+  Linking,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -13,6 +14,11 @@ import {
 
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useThemeContext } from "@/hooks/useThemeContext";
+
+// 仮のURL定義
+const PRIVACY_POLICY_URL = "https://example.com/privacy-policy";
+const TERMS_OF_SERVICE_URL = "https://example.com/terms-of-service";
+const CONTACT_URL = "https://example.com/contact";
 
 export default function SettingsScreen() {
   const { themeMode, setThemeMode, effectiveTheme } = useThemeContext();
@@ -40,6 +46,19 @@ export default function SettingsScreen() {
         },
       ],
     );
+  };
+
+  const openURL = async (url: string, title: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("エラー", `${title}を開くことができませんでした`);
+      }
+    } catch (error) {
+      Alert.alert("エラー", `${title}を開くことができませんでした`);
+    }
   };
 
   const getThemeModeLabel = (mode: "light" | "dark" | "system") => {
@@ -133,6 +152,58 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>サポート</Text>
+
+          <View
+            style={[
+              styles.supportSection,
+              { backgroundColor: backgroundColor === "#151718" ? "#2A2A2A" : "white" },
+            ]}>
+            <TouchableOpacity
+              style={[
+                styles.supportOption,
+                {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+                },
+              ]}
+              onPress={() => openURL(PRIVACY_POLICY_URL, "プライバシーポリシー")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="shield-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>プライバシーポリシー</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.supportOption,
+                {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: effectiveTheme === "dark" ? "#444" : "#E0E0E0",
+                },
+              ]}
+              onPress={() => openURL(TERMS_OF_SERVICE_URL, "利用規約")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="document-text-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>利用規約</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.supportOption}
+              onPress={() => openURL(CONTACT_URL, "お問い合わせ")}>
+              <View style={styles.optionLeft}>
+                <Ionicons name="mail-outline" size={24} color={textColor} />
+                <Text style={[styles.optionText, { color: textColor }]}>お問い合わせ</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>アプリについて</Text>
 
           <View
@@ -207,6 +278,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  supportSection: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  supportOption: {
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   optionLeft: {
     flexDirection: "row",
